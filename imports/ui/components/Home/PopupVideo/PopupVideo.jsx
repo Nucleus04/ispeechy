@@ -7,14 +7,25 @@ class PopupVideo extends Component {
         super(props);
         this.props = props;
         States.setWatcher(this, NAME);
+        this.popupRef = React.createRef();
     }
+
+    handleClickOutside = (event) => {
+        if (this.popupRef && !this.popupRef.current.contains(event.target) && !event.target.classList.contains('card-video')) {
+            States.setShowVideo();
+            console.log("Clicking outside")
+        } else {
+            console.log("Clicking inside")
+        }
+    }
+
 
     render() {
         States.initiateWatch(NAME);
         return (
-            <div className={`popup-video ${States.showVideo ? "" : "display-none"}`}>
+            <div className={`popup-video ${States.showVideo ? "" : "display-none"}`} onClick={this.handleClickOutside.bind(this)}>
                 <div className="popupwrapper">
-                    <div className="card-video">
+                    <div className="card-video" ref={this.popupRef}>
                         <div data-w-id="ea75d22d-72a8-5a2f-2279-1ca3fc639513" className="btn-close"><img src="/Asset-1_2Asset-1.png" loading="lazy" alt="" />
                         </div>
                         <div style={{ paddingTop: "56.17021276595745%" }} className="w-embed-youtubevideo">

@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import States from "../../../../api/classes/client/states/States";
 import Authentication from "../../../../api/classes/client/authentication/Authentication";
+import { withTracker } from "meteor/react-meteor-data";
+import { Capitalize, SanitizeEmail, SanitizeName, validatePassword } from "./utility/sanitize";
 
 const STATE = "state";
 class LoginRegistration extends Component {
@@ -34,22 +36,55 @@ class LoginRegistration extends Component {
 
     async login(event) {
         event.preventDefault();
-        const isSuccesful = await Authentication.login(this.state.email, this.state.password);
-        this.setState({
-            isSuccesful: isSuccesful,
-        })
-        if (isSuccesful) {
-            States.setShowLogin();
+        const isEmailValid = SanitizeEmail(this.state.email);
+        const isPasswordValid = validatePassword(this.state.password);
+
+        if (!isEmailValid || !isPasswordValid) {
+            if (!isEmailValid) alert("Invalid Email");
+            if (!isPasswordValid) alert("Invalid Password");
+        } else {
+            const Account = await Authentication.accountVerification(this.state.email);
+            if (Account.isVerified) {
+                const isSuccesful = await Authentication.login(this.state.email, this.state.password);
+                this.setState({
+                    isSuccesful: isSuccesful,
+                })
+                if (isSuccesful) {
+                    alert("Login successfully");
+                    States.setShowLogin();
+                }
+            } else {
+                alert(Account.message);
+            }
         }
+
     }
 
     async signup(event) {
         event.preventDefault();
-        const isSuccesful = await Authentication.signup(this.state.name, this.state.email, this.state.password);
-        this.setState({
-            isSuccesful: isSuccesful,
-            showVerificationModal: true,
-        })
+        const isNameValid = SanitizeName(this.state.name);
+        const isEmailValid = SanitizeEmail(this.state.email);
+        const isPasswordValid = validatePassword(this.state.password);
+
+        if (!isNameValid || !isEmailValid || !isPasswordValid) {
+            if (!isEmailValid) alert("Email is not valid");
+            if (!isNameValid) alert("Name is not valid");
+            if (!isPasswordValid) alert("Password is not valid");
+        } else {
+            const name = Capitalize(this.state.name);
+            const isSuccesful = await Authentication.signup(name, this.state.email, this.state.password);
+            if (isSuccesful) {
+                this.setState({
+                    isSuccesful: isSuccesful,
+                    showVerificationModal: true,
+                })
+            } else {
+                this.setState({
+                    isSuccesful: false,
+                    showVerificationModal: false,
+                });
+            }
+        }
     }
     handleVerificationCodeChange = (e, index) => {
         const { value } = e.target;
@@ -86,8 +121,8 @@ class LoginRegistration extends Component {
             })
         }
     }
+
     render() {
-        States.initiateWatch(STATE);
         return (
             <div className={`popup_loginsignup ${States.showLogin ? "" : "display-none"}`} >
                 <div className={`popup_signin ${this.state.isSigningIn ? "display-flex" : "display-none"}`}>
@@ -99,8 +134,8 @@ class LoginRegistration extends Component {
                                     <p className="p">Input your details below:</p>
                                 </div>
                             </div>
-                            <input type="text" className="popup_from-textfield w-input" maxLength="256" onChange={this.onInputChange.bind(this)} value={this.state.email} name="email" data-name="Name 3" placeholder="Email" id="name-3" />
-                            <input type="text" className="popup_from-textfield w-input" maxLength="256" onChange={this.onInputChange.bind(this)} value={this.state.password} name="password" data-name="Name 2" placeholder="Password" id="name-2" />
+                            <input type="text" className="popup_from-textfield w-input" maxLength="256" required onChange={this.onInputChange.bind(this)} value={this.state.email} name="email" data-name="Name 3" placeholder="Email" id="name-3" />
+                            <input type="password" className="popup_from-textfield w-input" maxLength="256" required onChange={this.onInputChange.bind(this)} value={this.state.password} name="password" data-name="Name 2" placeholder="Password" id="name-2" />
                             <div className="popup_form_btncontainer mb-20">
                                 <button type="submit" className="popup_btn w-button">Login</button>
                             </div>
@@ -125,8 +160,8 @@ class LoginRegistration extends Component {
                                     <h3 className="popupheader">Sign Up</h3>
                                 </div>
                             </div><input type="text" className="popup_from-textfield w-input" maxLength="256" onChange={this.onInputChange.bind(this)} name="name" value={this.state.name} data-name="Name 3" placeholder="Name" id="name-3" />
-                            <input type="text" className="popup_from-textfield w-input" maxLength="256" onChange={this.onInputChange.bind(this)} name="email" value={this.state.email} data-name="Name 3" placeholder="Email" id="name-3" />
-                            <input type="text" className="popup_from-textfield w-input" maxLength="256" onChange={this.onInputChange.bind(this)} name="password" value={this.state.password} data-name="Name 2" placeholder="Password" id="name-2" />
+                            <input type="email" className="popup_from-textfield w-input" maxLength="256" onChange={this.onInputChange.bind(this)} name="email" value={this.state.email} data-name="Name 3" placeholder="Email" id="name-3" />
+                            <input type="password" className="popup_from-textfield w-input" maxLength="256" onChange={this.onInputChange.bind(this)} name="password" value={this.state.password} data-name="Name 2" placeholder="Password" id="name-2" />
                             <div className="popup_form_btncontainer mb-20">
                                 <button data-w-id="33a12853-f2c9-f14d-30bf-abaabcbf0abe" type="submit" className="popup_btn w-button">Sign up</button>
                             </div>
@@ -153,16 +188,16 @@ class LoginRegistration extends Component {
                                 </div>
                                 <div className="popup_verificationfield_container">
                                     <div className="popup_verificationfield_col">
-                                        <input type="text" className="popup_from-verificationfield w-input" maxLength="256" name="name-4" data-name="Name 4" placeholder="" id="name-4" value={this.state.verificationCode[0] || ''} onChange={(e) => this.handleVerificationCodeChange(e, 0)} />
+                                        <input type="text" className="popup_from-verificationfield w-input" maxLength="1" name="name-4" data-name="Name 4" placeholder="" id="name-4" value={this.state.verificationCode[0] || ''} onChange={(e) => this.handleVerificationCodeChange(e, 0)} />
                                     </div>
                                     <div className="popup_verificationfield_col">
-                                        <input type="text" className="popup_from-verificationfield w-input" maxLength="256" name="name-4" data-name="Name 4" placeholder="" id="name-4" value={this.state.verificationCode[1] || ''} onChange={(e) => this.handleVerificationCodeChange(e, 1)} />
+                                        <input type="text" className="popup_from-verificationfield w-input" maxLength="1" name="name-4" data-name="Name 4" placeholder="" id="name-4" value={this.state.verificationCode[1] || ''} onChange={(e) => this.handleVerificationCodeChange(e, 1)} />
                                     </div>
                                     <div className="popup_verificationfield_col">
-                                        <input type="text" className="popup_from-verificationfield w-input" maxLength="256" name="name-4" data-name="Name 4" placeholder="" id="name-4" value={this.state.verificationCode[2] || ''} onChange={(e) => this.handleVerificationCodeChange(e, 2)} />
+                                        <input type="text" className="popup_from-verificationfield w-input" maxLength="1" name="name-4" data-name="Name 4" placeholder="" id="name-4" value={this.state.verificationCode[2] || ''} onChange={(e) => this.handleVerificationCodeChange(e, 2)} />
                                     </div>
                                     <div className="popup_verificationfield_col">
-                                        <input type="text" className="popup_from-verificationfield w-input" maxLength="256" name="name-4" data-name="Name 4" placeholder="" id="name-4" value={this.state.verificationCode[3] || ''} onChange={(e) => this.handleVerificationCodeChange(e, 3)} />
+                                        <input type="text" className="popup_from-verificationfield w-input" maxLength="1" name="name-4" data-name="Name 4" placeholder="" id="name-4" value={this.state.verificationCode[3] || ''} onChange={(e) => this.handleVerificationCodeChange(e, 3)} />
                                     </div>
                                 </div>
                             </div>
@@ -187,5 +222,4 @@ class LoginRegistration extends Component {
     }
 }
 
-
-export default LoginRegistration;
+export default LoginRegistration

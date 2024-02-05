@@ -6,6 +6,7 @@ import Client from "../Client";
 class State extends Watcher {
     #showLogin = false;
     #showVideo = false;
+    #signupEmail = null;
     constructor(parent) {
         super(parent);
     }
@@ -18,6 +19,10 @@ class State extends Watcher {
         return this.#showVideo;
     }
 
+    get signupEmail() {
+        return this.#signupEmail;
+    }
+
     setShowLogin() {
         this.#showLogin = !this.#showLogin;
         this.activateWatcher();
@@ -25,8 +30,13 @@ class State extends Watcher {
     }
 
     setShowVideo() {
-        console.log("Change show video");
         this.#showVideo = !this.#showVideo;
+        this.activateWatcher();
+        return;
+    }
+
+    setSignupEmail(email) {
+        this.#signupEmail = email;
         this.activateWatcher();
         return;
     }

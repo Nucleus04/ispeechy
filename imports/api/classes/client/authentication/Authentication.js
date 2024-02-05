@@ -22,7 +22,15 @@ class Authentication extends Watcher {
         })
     }
 
-
+    accountVerification(email) {
+        return new Promise((resolve, reject) => {
+            this.Parent.callFunc(AUTHENTICATION.ACCOUNTVALIDATOR, email).then((result) => {
+                resolve(result);
+            }).catch((error) => {
+                console.log(error);
+            })
+        })
+    }
     signup(name, email, password) {
         return new Promise((resolve, reject) => {
 
