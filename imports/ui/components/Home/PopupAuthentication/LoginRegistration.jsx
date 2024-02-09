@@ -202,7 +202,7 @@ class LoginRegistration extends Component {
                                 </div>
                             </div>
                             <div className="popup_form_btncontainer justify-spacebetween">
-                                <a data-w-id="e43dec5b-6b16-d7a2-4f0f-8bf1f16ac719" href="#" className="popup_link">Back</a>
+                                {/* <a data-w-id="e43dec5b-6b16-d7a2-4f0f-8bf1f16ac719" href="#" className="popup_link">Back</a> */}
                                 <a href="#" className="popup_btn w-button" onClick={this.verifyCode.bind(this)}>Confirm</a>
                             </div>
                         </form>

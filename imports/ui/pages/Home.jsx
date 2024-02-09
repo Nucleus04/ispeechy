@@ -18,6 +18,7 @@ import Footer from "../components/Home/Footer/Footer";
 import PopupVideo from "../components/Home/PopupVideo/PopupVideo";
 import LoginRegistration from "../components/Home/PopupAuthentication/LoginRegistration";
 import GotCode from "../components/Home/PopupGotCode/GotCode";
+import Hero2 from "../components/Home/Hero/HeroV2";
 
 
 class Home extends Component {
@@ -31,7 +32,7 @@ class Home extends Component {
             <div>
                 <div className="page-wrapper">
                     <Navbar />
-                    <Hero />
+                    <Hero2 />
                     <Signup />
                     <Voice />
                     <Mission />
